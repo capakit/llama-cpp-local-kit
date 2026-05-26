@@ -1,0 +1,70 @@
+version: '1'
+name: llama-cpp-local
+options:
+  default_model:
+    kind: string
+    default: ggml-org/gemma-3-270m-it-GGUF:Q8_0
+    description: Default GGUF/Hugging Face model spec.
+  release_tag:
+    kind: string
+    default: b9060
+    description: llama.cpp release tag to hydrate.
+  context_size:
+    kind: number
+    default: 8192
+    description: llama.cpp context size.
+  threads:
+    kind: number
+    default: 4
+    description: llama.cpp CPU thread count.
+  gpu:
+    kind: enum
+    enum_values:
+    - none
+    - metal
+    default: metal
+    description: Local GPU acceleration mode.
+exports:
+  oaic:
+    path: /oaic
+  mcp:
+    path: /mcp
+host_mounts:
+  models:
+    usage: Local GGUF model cache for llama.cpp
+    access: read_write
+workloads:
+  llama-gateway:
+    mounts:
+    - mount_mid: models
+      access: read_write
+    endpoints:
+    - oaic
+    - mcp
+    runtime:
+      capabilities:
+        gpu:
+          from_option: gpu
+      source:
+        toolchain: bun
+        prepare:
+          command: bun install
+          allow_network: true
+        start:
+          command: bun run src/index.ts
+          allow_network: true
+          env_from_options:
+            LLAMA_CPP_DEFAULT_MODEL: default_model
+            LLAMA_CPP_RELEASE_TAG: release_tag
+            LLAMA_CPP_CONTEXT_SIZE: context_size
+            LLAMA_CPP_THREADS: threads
+expose:
+- path: /oaic
+  target: llama-gateway
+  endpoints:
+  - oaic
+- path: /mcp
+  target: llama-gateway
+  endpoints:
+  - mcp
+  default_mcp: true
