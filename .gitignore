@@ -5,6 +5,8 @@
 _state/
 _packages/
 .apply
+tests/*/models/*
+!tests/*/models/.gitkeep
 
 # Python
 __pycache__/
