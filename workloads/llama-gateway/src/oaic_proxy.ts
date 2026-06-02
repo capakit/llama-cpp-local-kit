@@ -1,4 +1,5 @@
 import type { EndpointPath, RunnerSdk } from "@capakit/sdk";
+import { mountOaic } from "@capakit/sdk/oaic";
 
 import type { LlamaServerManager } from "./llama_server.ts";
 
@@ -24,8 +25,7 @@ export function registerOaic(
     llama: LlamaServerManager,
     endpoint: EndpointPath,
 ): void {
-    sdk.mount({
-        protocol: "oaic",
+    mountOaic(sdk, {
         endpoint,
         handler: async (request) => {
             const url = new URL(request.url);

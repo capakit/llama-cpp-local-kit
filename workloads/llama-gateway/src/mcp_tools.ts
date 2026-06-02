@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { EndpointPath, RunnerSdk } from "@capakit/sdk";
+import { mountMcp } from "@capakit/sdk/mcp";
 import { z } from "zod";
 
 import type { LlamaServerManager } from "./llama_server.ts";
@@ -48,8 +49,7 @@ export function registerMcp(
         },
     );
 
-    sdk.mount({
-        protocol: "mcp",
+    mountMcp(sdk, {
         endpoint,
         server: mcpServer,
     });

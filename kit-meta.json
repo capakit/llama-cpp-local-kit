@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "displayName": "llama.cpp Local",
+  "repo": "https://github.com/capakit/llama-cpp-local-kit",
+  "description": "Local AI app Kit that serves GGUF models through llama.cpp with OpenAI-compatible and MCP endpoints.",
+  "whatItDoes": [
+    "Downloads and runs a llama.cpp release on demand.",
+    "Loads a local path or Hugging Face GGUF model spec.",
+    "Exposes OpenAI-compatible chat and an MCP tool for local model prompts."
+  ],
+  "technologies": [
+    "llama.cpp",
+    "GGUF models",
+    "CapaKit OAIC endpoint",
+    "CapaKit MCP endpoint",
+    "TypeScript",
+    "Bun"
+  ],
+  "skillProviders": [
+    "codex"
+  ],
+  "catalog": {
+    "featured": false,
+    "order": 30,
+    "tags": [
+      "local-llm",
+      "oaic",
+      "mcp"
+    ]
+  }
+}

@@ -1,57 +1,101 @@
-# llama-cpp-local
+<!--
+Generated from kit-meta.json by scripts/demo-kit-standard.mjs.
+Update kit-meta.json or capability.yml, then rerun the generator instead of hand-editing generated README sections.
+-->
 
-Local llama.cpp gateway kit for CapaKit.
+# llama.cpp Local
 
-## What It Exposes
+Local AI app Kit that serves GGUF models through llama.cpp with OpenAI-compatible and MCP endpoints.
 
-- OAIC endpoint at `/oaic`, forwarded to a local `llama-server`.
-- MCP endpoint at `/mcp`, with `ask_local_model` for quick local chat testing.
-- On-demand llama.cpp hydration from the configured release tag.
-- On-demand GGUF model hydration into the `models` host mount.
+## What It Does
 
-## Options
+- Downloads and runs a llama.cpp release on demand.
+- Loads a local path or Hugging Face GGUF model spec.
+- Exposes OpenAI-compatible chat and an MCP tool for local model prompts.
 
-- `default_model`: Hugging Face GGUF repo selector or local GGUF path.
-- `release_tag`: llama.cpp release tag to download.
-- `context_size`: llama.cpp context size.
-- `threads`: CPU thread count.
-- `gpu`: `metal` or `none`.
+## Technologies
 
-Default model:
+- llama.cpp
+- GGUF models
+- CapaKit OAIC endpoint
+- CapaKit MCP endpoint
+- TypeScript
+- Bun
+
+## App Kit Info
 
 ```text
-ggml-org/gemma-3-270m-it-GGUF:Q8_0
+AI app Kit: llama-cpp-local
+
+Exposes
+- Public path: /oaic
+  Protocols:
+    - Protocol: oaic
+      Path: /oaic
+- Public path: /mcp
+  Protocols:
+    - Protocol: mcp
+      Path: /mcp
+  Default MCP: yes
+
+Requires
+Secrets:
+No secrets declared.
+
+Host mounts:
+- models [read_write]
+  Usage: Local GGUF model cache for llama.cpp
+
+Options:
+- context_size [number, default=8192]: llama.cpp context size.
+- default_model [string, default=ggml-org/gemma-3-270m-it-GGUF:Q8_0]: Default GGUF/Hugging Face model spec.
+- gpu [enum, default=metal, values=none|metal]: Local GPU acceleration mode.
+- release_tag [string, default=b9060]: llama.cpp release tag to hydrate.
+- threads [number, default=4]: llama.cpp CPU thread count.
+
+External services
+No external services declared.
+
+AI app Kit dependencies
+No AI app Kit dependencies declared.
+Exports provided to dependents:
+- mcp -> /mcp
+- oaic -> /oaic
+
+Commands
+- Run:
+  capakit run https://github.com/capakit/llama-cpp-local-kit \
+    --mount models=~/.capakit/models
+- Test:
+  capakit test /Users/roman/Code/capakit/demo_kits/llama-cpp-local-kit
 ```
-
-## Required Mounts
-
-- `models`: read/write cache for llama.cpp binaries, GGUF files, and runtime caches.
 
 ## Run
 
 ```sh
-capakit up . --mount models=/path/to/model-cache
+capakit run https://github.com/capakit/llama-cpp-local-kit \
+--mount models=~/.capakit/models
 ```
 
-Call MCP:
+## Install As A Skill
 
 ```sh
-capakit mcp list-tools .
-capakit mcp call-tool . --tool ask_local_model --json '{"prompt":"Say hello from local llama.cpp"}'
+capakit run https://github.com/capakit/llama-cpp-local-kit --global-skill codex \
+--mount models=~/.capakit/models
 ```
 
-Call OAIC:
-
-```sh
-curl "$CAPAKIT_OAIC_URL/v1/chat/completions" \
-  -H 'content-type: application/json' \
-  -d '{"model":"ggml-org/gemma-3-270m-it-GGUF:Q8_0","messages":[{"role":"user","content":"Say hello"}]}'
-```
-
-## Run Capability Test
-
-The test auto-binds `models` from `tests/simple-local-chat/models`.
+## Test
 
 ```sh
 capakit test .
 ```
+
+## Security
+
+Vault secrets are user-provided secrets available only to trusted integrations such as secure exit nodes. Kit secrets are Kit-local secrets that can be exposed to code workloads.
+
+## About CapaKit
+
+CapaKit runs AI app Kits locally with isolated workloads, explicit mounts, and agent-friendly commands. Learn more at https://capakit.com.
+
+More AI app Kits: https://github.com/capakit/apps
