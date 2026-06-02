@@ -67,7 +67,7 @@ Commands
   capakit run https://github.com/capakit/llama-cpp-local-kit \
     --mount models=~/.capakit/models
 - Test:
-  capakit test /Users/roman/Code/capakit/demo_kits/llama-cpp-local-kit
+  capakit test .
 ```
 
 ## Run
