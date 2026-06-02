@@ -7,6 +7,8 @@ Update kit-meta.json or capability.yml, then rerun the generator instead of hand
 
 Local AI app Kit that serves GGUF models through llama.cpp with OpenAI-compatible and MCP endpoints.
 
+**Tags:** `llama.cpp` `gguf` `oaic` `mcp` `local-ai` `typescript` `bun`
+
 ## What It Does
 
 - Downloads and runs a llama.cpp release on demand.

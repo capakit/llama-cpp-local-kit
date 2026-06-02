@@ -23,9 +23,13 @@
     "featured": false,
     "order": 30,
     "tags": [
-      "local-llm",
+      "llama.cpp",
+      "gguf",
       "oaic",
-      "mcp"
+      "mcp",
+      "local-ai",
+      "typescript",
+      "bun"
     ]
   }
 }
