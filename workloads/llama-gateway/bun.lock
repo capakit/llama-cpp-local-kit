@@ -7,7 +7,7 @@
       "dependencies": {
         "@a2a-js/sdk": "^0.3.13",
         "@anthropic-ai/sdk": "^0.100.1",
-        "@capakit/sdk": "0.0.6-dev.20260603115503.29671fe8",
+        "@capakit/sdk": "0.0.6-dev.20260603120812.cd880dfb",
         "@google/genai": "^2.7.0",
         "@modelcontextprotocol/sdk": "1.29.0",
         "openai": "^6.41.0",
@@ -26,7 +26,7 @@
 
     "@babel/runtime": ["@babel/runtime@7.29.7", "", {}, "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw=="],
 
-    "@capakit/sdk": ["@capakit/sdk@0.0.6-dev.20260603115503.29671fe8", "", { "peerDependencies": { "@a2a-js/sdk": "^0.3.13", "@anthropic-ai/sdk": "^0.100.1", "@google/genai": "^2.7.0", "@modelcontextprotocol/sdk": "^1.29.0", "openai": "^6.41.0", "ws": "^8.21.0" }, "optionalPeers": ["@a2a-js/sdk", "@anthropic-ai/sdk", "@google/genai", "@modelcontextprotocol/sdk", "openai", "ws"] }, "sha512-MCGb0i4yAD+0XguuIC/ygvmKS3kxkmQoJHPO4o3Pqhgl7qhE9aTb9TVUPRaRyP+8wmB2zOLKx7A7e86m+w4XZw=="],
+    "@capakit/sdk": ["@capakit/sdk@0.0.6-dev.20260603120812.cd880dfb", "", { "peerDependencies": { "@a2a-js/sdk": "^0.3.13", "@anthropic-ai/sdk": "^0.100.1", "@google/genai": "^2.7.0", "@modelcontextprotocol/sdk": "^1.29.0", "openai": "^6.41.0", "ws": "^8.21.0" }, "optionalPeers": ["@a2a-js/sdk", "@anthropic-ai/sdk", "@google/genai", "@modelcontextprotocol/sdk", "openai", "ws"] }, "sha512-YcNuSZNLccEXv2j4X7Cfeq0Ce9S4D15ijPdcHABIGDNPRcGqUbkKDXJ4cFbF8CBJNXypzF0+KZmSF/ED36NGEQ=="],
 
     "@google/genai": ["@google/genai@2.7.0", "", { "dependencies": { "google-auth-library": "^10.3.0", "p-retry": "^4.6.2", "protobufjs": "^7.5.4", "ws": "^8.18.0" }, "peerDependencies": { "@modelcontextprotocol/sdk": "^1.25.2" }, "optionalPeers": ["@modelcontextprotocol/sdk"] }, "sha512-tv0DRtcndt2oEhBYy+5mA0TaXH98+L1Gt0AP9unBfH7DP20KhB7+O3QqAN1Lz+laMARGTHS7BFQSNpLbl4gm1g=="],
 
