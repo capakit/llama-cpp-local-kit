@@ -5,6 +5,10 @@ options:
     kind: string
     default: ggml-org/gemma-3-270m-it-GGUF:Q8_0
     description: Default GGUF/Hugging Face model spec.
+  hydrate_models:
+    kind: string
+    default: ""
+    description: Additional GGUF/Hugging Face model specs to hydrate before start, separated by commas or newlines.
   release_tag:
     kind: string
     default: b9060
@@ -24,11 +28,6 @@ options:
     - metal
     default: metal
     description: Local GPU acceleration mode.
-exports:
-  oaic:
-    path: /oaic
-  mcp:
-    path: /mcp
 host_mounts:
   models:
     usage: Local GGUF model cache for llama.cpp
@@ -49,10 +48,16 @@ workloads:
         toolchain: bun
         prepare:
           command: bun install
-          allow_network: true
+        hydrate:
+          command: bun run src/prepare.ts
+          env_from_options:
+            LLAMA_CPP_DEFAULT_MODEL: default_model
+            LLAMA_CPP_HYDRATE_MODELS: hydrate_models
+            LLAMA_CPP_RELEASE_TAG: release_tag
+            LLAMA_CPP_CONTEXT_SIZE: context_size
+            LLAMA_CPP_THREADS: threads
         start:
           command: bun run src/index.ts
-          allow_network: true
           env_from_options:
             LLAMA_CPP_DEFAULT_MODEL: default_model
             LLAMA_CPP_RELEASE_TAG: release_tag

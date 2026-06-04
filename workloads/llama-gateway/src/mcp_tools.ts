@@ -34,6 +34,9 @@ export function registerMcp(
                     stream: false,
                 }),
             });
+            if (!response.ok) {
+                throw new Error(`llama.cpp request failed: ${response.status} ${await response.text()}`);
+            }
             const json = await response.json() as {
                 model?: string;
                 choices?: Array<{ message?: { content?: string } }>;

@@ -6,7 +6,7 @@ import type { Readable } from "node:stream";
 
 import { udsFetch } from "./uds_fetch.ts";
 
-type LlamaServerManagerOptions = {
+export type LlamaServerManagerOptions = {
     modelsDir: string;
     defaultModel: string;
     releaseTag: string;
@@ -35,6 +35,14 @@ type ModelMemoryEstimate = {
     ratio: number;
 };
 
+type HydratedRuntime = {
+    hfHome: string;
+    llamaCache: string;
+    llamaServer: string;
+    modelPath: string;
+    mmprojPath: string | null;
+};
+
 const DEFAULT_MEMORY_WARN_RATIO = 0.60;
 const DEFAULT_MEMORY_FAIL_RATIO = 0.90;
 const MODEL_RUNTIME_OVERHEAD_RATIO = 0.20;
@@ -47,6 +55,10 @@ export class LlamaServerManager {
     private startPromise: Promise<ActiveServer> | null = null;
 
     constructor(private readonly options: LlamaServerManagerOptions) {}
+
+    async prepare(model: string | undefined = undefined): Promise<void> {
+        await hydrateRuntime(this.options, parseRuntimeModelSpec(model ?? this.options.defaultModel), "hydrate");
+    }
 
     async fetch(model: string | undefined, path: string, init: RequestInit): Promise<Response> {
         const server = await this.ensure(model);
@@ -105,19 +117,12 @@ export class LlamaServerManager {
 
     private async start(target: RuntimeModelSpec): Promise<ActiveServer> {
         const runtimeDir = llamaRuntimeDir();
-        const hfHome = join(this.options.modelsDir, "hf-home");
-        const llamaCache = join(this.options.modelsDir, "llama-cache");
-        const llamaServer = await hydrateLlamaServer(
-            this.options.modelsDir,
-            this.options.releaseTag,
+        const { hfHome, llamaCache, llamaServer, modelPath, mmprojPath } = await hydrateRuntime(
+            this.options,
+            target,
+            "cache-only-optional-mmproj",
         );
-        const modelPath = await hydrateModel(this.options.modelsDir, target.model, "model");
-        const mmprojPath = target.mmproj
-            ? await hydrateModel(this.options.modelsDir, target.mmproj, "mmproj")
-            : await hydrateOptionalMmproj(this.options.modelsDir, target.model);
         await mkdir(runtimeDir, { recursive: true });
-        await mkdir(hfHome, { recursive: true });
-        await mkdir(llamaCache, { recursive: true });
 
         const socketPath = join(runtimeDir, `${shortHash(target.key)}.sock`);
         await rm(socketPath, { force: true });
@@ -154,6 +159,38 @@ export class LlamaServerManager {
     }
 }
 
+export async function hydrateLlamaRuntime(
+    options: LlamaServerManagerOptions,
+    extraModels: string[] = [],
+): Promise<void> {
+    for (const target of hydrateRuntimeTargets(options.defaultModel, extraModels)) {
+        await hydrateRuntime(options, target, "hydrate");
+    }
+}
+
+async function hydrateRuntime(
+    options: LlamaServerManagerOptions,
+    target: RuntimeModelSpec,
+    optionalMmprojMode: "hydrate" | "cache-only-optional-mmproj",
+): Promise<HydratedRuntime> {
+    const hfHome = join(options.modelsDir, "hf-home");
+    const llamaCache = join(options.modelsDir, "llama-cache");
+    const llamaServer = await hydrateLlamaServer(options.modelsDir, options.releaseTag);
+    const modelPath = await hydrateModel(options.modelsDir, target.model, "model");
+    const mmprojPath = target.mmproj
+        ? await hydrateModel(options.modelsDir, target.mmproj, "mmproj")
+        : await hydrateOptionalMmproj(options.modelsDir, target.model, optionalMmprojMode);
+    await mkdir(hfHome, { recursive: true });
+    await mkdir(llamaCache, { recursive: true });
+    return {
+        hfHome,
+        llamaCache,
+        llamaServer,
+        modelPath,
+        mmprojPath,
+    };
+}
+
 function llamaServerArgs(...base: string[]): string[] {
     if (process.env.CAPAKIT_GPU === "metal") {
         return [...base, "--n-gpu-layers", "999"];
@@ -179,6 +216,23 @@ function llamaRuntimeDir(): string {
     return join(process.env.TMPDIR ?? "/tmp", "llama-cpp");
 }
 
+function hydrateRuntimeTargets(defaultModel: string, extraModels: string[]): RuntimeModelSpec[] {
+    const targets: RuntimeModelSpec[] = [];
+    const seen = new Set<string>();
+    for (const model of [defaultModel, ...extraModels]) {
+        if (!model.trim()) {
+            continue;
+        }
+        const target = parseRuntimeModelSpec(model);
+        if (seen.has(target.key)) {
+            continue;
+        }
+        seen.add(target.key);
+        targets.push(target);
+    }
+    return targets;
+}
+
 type GgufKind = "model" | "mmproj";
 
 async function hydrateModel(modelsDir: string, model: string, kind: GgufKind): Promise<string> {
@@ -189,6 +243,11 @@ async function hydrateModel(modelsDir: string, model: string, kind: GgufKind): P
     const { repo, selector } = parseModelSpec(model);
     const modelDir = join(modelsDir, "gguf", safeName(repo));
     await mkdir(modelDir, { recursive: true });
+    const cached = await findCachedGgufFile(modelDir, selector, kind);
+    if (cached) {
+        await checkModelMemory(model, await localFileSize(cached));
+        return cached;
+    }
     const selected = await resolveGgufFile(repo, selector, kind);
     if (!selected) {
         throw new Error(`no GGUF file found in ${repo}${selector ? ` matching ${selector}` : ""}`);
@@ -210,17 +269,28 @@ async function hydrateModel(modelsDir: string, model: string, kind: GgufKind): P
     return destination;
 }
 
-async function hydrateOptionalMmproj(modelsDir: string, model: string): Promise<string | null> {
+async function hydrateOptionalMmproj(
+    modelsDir: string,
+    model: string,
+    mode: "hydrate" | "cache-only-optional-mmproj",
+): Promise<string | null> {
     if (isLocalModelSpec(model)) {
         return null;
     }
     const { repo, selector } = parseModelSpec(model);
+    const modelDir = join(modelsDir, "gguf", safeName(repo));
+    await mkdir(modelDir, { recursive: true });
+    const cached = await findCachedGgufFile(modelDir, selector, "mmproj");
+    if (cached) {
+        return cached;
+    }
+    if (mode === "cache-only-optional-mmproj") {
+        return null;
+    }
     const selected = await resolveGgufFile(repo, selector, "mmproj", true);
     if (!selected) {
         return null;
     }
-    const modelDir = join(modelsDir, "gguf", safeName(repo));
-    await mkdir(modelDir, { recursive: true });
     const destination = join(modelDir, selected.fileName);
     if (await isExecutable(destination)) {
         return destination;
@@ -233,6 +303,27 @@ async function hydrateOptionalMmproj(modelsDir: string, model: string): Promise<
     }
     await writeFile(destination, Buffer.from(await response.arrayBuffer()));
     return destination;
+}
+
+async function findCachedGgufFile(
+    modelDir: string,
+    selector: string | null,
+    kind: GgufKind,
+): Promise<string | null> {
+    let entries;
+    try {
+        entries = await readdir(modelDir, { withFileTypes: true });
+    } catch {
+        return null;
+    }
+    const candidates = entries
+        .filter((entry) => entry.isFile() && entry.name.endsWith(".gguf"))
+        .filter((entry) => kind === "mmproj" ? isMmprojFile(entry.name) : !isMmprojFile(entry.name))
+        .filter((entry) => !selector || entry.name.toLowerCase().includes(selector.toLowerCase()))
+        .map((entry) => entry.name)
+        .sort();
+    const selected = candidates[0];
+    return selected ? join(modelDir, selected) : null;
 }
 
 async function checkRemoteHfModelMemory(model: string): Promise<void> {
