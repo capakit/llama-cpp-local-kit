@@ -10,11 +10,12 @@
   ],
   "technologies": [
     "llama.cpp",
-    "GGUF models",
-    "CapaKit OAIC endpoint",
-    "CapaKit MCP endpoint",
-    "TypeScript",
-    "Bun"
+    "gguf",
+    "oaic",
+    "mcp",
+    "local-ai",
+    "typescript",
+    "bun"
   ],
   "skillProviders": [
     "codex"
