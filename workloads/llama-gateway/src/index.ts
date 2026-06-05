@@ -1,10 +1,10 @@
-import { createRunnerSdk, endpointPath, hostMountMid } from "@capakit/sdk";
+import { createWorkloadSdk, endpointPath, hostMountMid } from "@capakit/sdk";
 
 import { LlamaServerManager } from "./llama_server.ts";
 import { registerMcp } from "./mcp_tools.ts";
 import { registerOaic } from "./oaic_proxy.ts";
 
-const sdk = createRunnerSdk({
+const sdk = createWorkloadSdk({
     onShutdown: async () => {
         await llama.stop();
     },

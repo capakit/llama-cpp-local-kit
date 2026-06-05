@@ -209,7 +209,7 @@ function llamaServerArgs(...base: string[]): string[] {
 }
 
 function llamaRuntimeDir(): string {
-    const ingressBind = process.env.CAPAKIT_RUNNER_MANAGED_INGRESS_BIND;
+    const ingressBind = process.env.CAPAKIT_WORKLOAD_INGRESS_BIND;
     if (ingressBind?.startsWith("unix:")) {
         return dirname(ingressBind.slice("unix:".length));
     }

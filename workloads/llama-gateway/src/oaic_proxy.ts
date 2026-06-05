@@ -1,4 +1,4 @@
-import type { EndpointPath, RunnerSdk } from "@capakit/sdk";
+import type { EndpointPath, WorkloadSdk } from "@capakit/sdk";
 import { mountOaic } from "@capakit/sdk/oaic";
 
 import type { LlamaServerManager } from "./llama_server.ts";
@@ -21,7 +21,7 @@ type OaicContentPart = {
 };
 
 export function registerOaic(
-    sdk: RunnerSdk,
+    sdk: WorkloadSdk,
     llama: LlamaServerManager,
     endpoint: EndpointPath,
 ): void {
