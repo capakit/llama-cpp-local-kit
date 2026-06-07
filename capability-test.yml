@@ -1,11 +1,13 @@
 tests:
-  - id: simple-local-chat
-    test: answers a simple prompt with the local model
-    exposed_path: /mcp
-    tool: ask_local_model
-    inputs:
-      prompt: "Reply with a short confirmation that the local llama.cpp model is running."
-    verboseOutput:
+  - id: answers-simple-prompt-with-local-model
+    kind: mcp
+    target:
+      exposed_path: /mcp
+    request:
+      tool: ask_local_model
+      inputs:
+        prompt: "Reply with a short confirmation that the local llama.cpp model is running."
+    verbose_output:
       - $.model
       - $.content
     validations:
