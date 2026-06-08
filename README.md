@@ -13,7 +13,7 @@ Local AI app Kit that serves GGUF models through llama.cpp with OpenAI-compatibl
 - Loads a local path or Hugging Face GGUF model spec.
 - Exposes OpenAI-compatible chat and an MCP tool for local model prompts.
 
-## Technologies
+## Tags
 
 - llama.cpp
 - gguf
