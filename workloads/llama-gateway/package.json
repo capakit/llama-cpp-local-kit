@@ -7,7 +7,7 @@
         "start": "bun run src/index.ts"
     },
     "dependencies": {
-        "@capakit/sdk": "0.0.7",
+        "@capakit/sdk": "0.0.10",
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
         "openai": "^6.41.0",
