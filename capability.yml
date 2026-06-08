@@ -1,5 +1,6 @@
 version: '1'
 name: llama-cpp-local
+license: Apache-2.0
 options:
   default_model:
     kind: string
